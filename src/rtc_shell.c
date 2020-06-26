@@ -36,7 +36,7 @@ const char MenuLine3[] = {"5-12hour  6-24hour "};
 
 // GLobal rtc_shell variables
 extern void ResetISR(void);
-Temperature_s temp;
+DS18b20_t temp;
 uint8_t key;
 int lasttemp = 0;
 int8_t lasthour = 0;
@@ -63,8 +63,8 @@ void rtc_hwd_setup(void)
 	debug_frmwrk_init(115200);
 	DS1307_Init(ENABLE);
 	kp_Init();
-	DS18B20Init();
-    temp.Temp_Type = Celcius;
+	DS18B20Init(&temp);
+    temp.Temperature_s.Temp_Type = CELSIUS;
     degree_char = 'c';
     delay32Ms(0,100);
 	GLCD_SSD1306Init(DISABLE);
@@ -104,11 +104,11 @@ void rtc_display_time_date(void)
 {
 	DS18B20GetTemperature(&temp);
 
-	if (lasttemp != temp.Whole)
+	if (lasttemp != temp.Temperature_s.Temp_Whole)
 	{
 		//xsprintf((char*)prtbuf , "temp:%d%c", temp.Whole,degree_char);
 		//GLCD_putString(1,10,prtbuf,OLED_COLOR_WHITE,OLED_COLOR_BLACK,&font);
-    	lasttemp = temp.Whole;
+    	lasttemp = temp.Temperature_s.Temp_Whole;
 	}
 	DS1307GetDateTime(&rtc);
 	if ( lasthour != rtc.hour || lastminute != rtc.min ||
@@ -155,14 +155,14 @@ void rtc_display_time_date(void)
 
 		break;
 	case '0':
-		temp.Temp_Type = Celcius;
+		temp.Temperature_s.Temp_Type = CELSIUS;
 		degree_char = 'c';
 		break;
 	case '*':
 		NVIC_SystemReset();
 		break;
 	case '#':
-		temp.Temp_Type = Farenheit;
+		temp.Temperature_s.Temp_Type = FARENHEIT;
 		degree_char = 'f';
 		break;
 	default:

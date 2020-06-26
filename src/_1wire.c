@@ -18,8 +18,10 @@
  ********************************************************************/
  /****** I N C L U D E S **********************************************************/
 #include <_1wire.h>
-#include <timer32_lpc11xx.h>
+#include <define_pins.h>
+#include <lpc11xx_gpio.h>
 #include <lpc11xx_syscon.h>
+#include <timer32_lpc11xx.h>
 
 
 /**PORT D E F I N I T I O N S ****************************************************/
@@ -29,19 +31,13 @@
 // This Configuration is required to make any PIC MicroController
 // I/O pin as Open drain to drive 1-wire.
 ///****************************************************
+#define  OW_IO_PINS			LPC_IOCON
 
-//#define OW_PIN_DIRECTION 		//LATDbits.LATD8
-//#define OW_WRITE_PIN  		//TRISDbits.TRISD8
-//#define OW_READ_PIN			//PORTDbits.RD8
-
-
-#define OW_PIN				2
-//#define OW_PORT				3
-#define OW_PORT				LPC_GPIO3
-#define OW_PIN_MASK			Bit(OW_PIN)
-#define OW_PIN_DIR_OUT()	OW_PORT->DIR |= (1 << OW_PIN)
-#define OW_PIN_DIR_IN()		OW_PORT->DIR &= ~(1 << OW_PIN)
-
+typedef struct{
+	uint8_t port;
+	uint8_t pin;
+}OW_t;
+OW_t ow;
 
 // Input or Output
 /**********************************************************************
@@ -53,8 +49,7 @@
 ***********************************************************************/
 static void OW_PIN_DIRECTION (DIRECTION_eType direction)
 {
-	if (direction) OW_PORT->DIR |= (1 << OW_PIN);
-	else OW_PORT->DIR &= ~(1 << OW_PIN);
+	GPIOSetDir(ow.port, ow.pin, direction);
 }
 
 /**********************************************************************
@@ -66,16 +61,7 @@ static void OW_PIN_DIRECTION (DIRECTION_eType direction)
 ***********************************************************************/
 static void OW_WRITE_PIN(LOGIC_LEVEL_eType bitstate)
 {
-	switch (bitstate){
-		case LOW:
-			OW_PORT->DATA &= ~(OW_PIN_MASK);
-			break;
-		case HIGH:
-			OW_PORT->DATA |= (OW_PIN_MASK);
-			break;
-		default:
-			break;
-	}
+	GPIOSetValue(ow.port, ow.pin, bitstate);
 }
 
 /**********************************************************************
@@ -88,7 +74,7 @@ static void OW_WRITE_PIN(LOGIC_LEVEL_eType bitstate)
 ***********************************************************************/
 static uint8_t OW_READ_PIN(void)
 {
-	return (OW_PORT->DATA & OW_PIN_MASK) ? HIGH:LOW;
+	return  GPIOGetValue(ow.port, ow.pin);
 }
 
 //****** V A R I A B L E S ********************************************************/
@@ -103,11 +89,11 @@ unsigned char macro_delay;
 ***********************************************************************/
 void OW_PinInit(uint8_t port, uint8_t pin)
 {
-	// PORT 3 PIN 2 for 1 wire
-	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<AHB_IOCON);// Enable IOCON Clock source
-	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<AHB_GPIO);	// Enable GPIO Clock source
-	LPC_IOCON->PIO3_2 = 0;						// GPIO, Normal, No OD
-	LPC_GPIO3->DIR |= (1<<2);					// As output
+	// PORT 1 PIN 5 for 1 wire
+	syscon_PeripheralClock(AHB_IOCON,ENABLE);
+	syscon_PeripheralClock(AHB_GPIO,ENABLE);
+	ow.port = port;
+	ow.pin = pin;
 }
 
 /**********************************************************************
@@ -119,8 +105,8 @@ void OW_PinInit(uint8_t port, uint8_t pin)
 ***********************************************************************/
 void drive_OW_low (void)
 {
-	OW_PIN_DIRECTION (OUTPUT);
-	OW_WRITE_PIN(LOW);
+	OW_PIN_DIRECTION(OW_OUTPUT);
+	OW_WRITE_PIN(OW_LOW);
 }
 
 /**********************************************************************
@@ -130,10 +116,10 @@ void drive_OW_low (void)
 * Output:		   None	
 * Overview:		   Configure the OW_PIN as Output and drive the OW_PIN HIGH.	
 ***********************************************************************/
-void drive_OW_high (void)
+static void drive_OW_high (void)
 {
-	OW_PIN_DIRECTION (OUTPUT);
-	OW_WRITE_PIN(HIGH);
+	OW_PIN_DIRECTION(OW_OUTPUT);
+	OW_WRITE_PIN(OW_HIGH);
 }
 
 /**********************************************************************
@@ -143,13 +129,12 @@ void drive_OW_high (void)
 * Output:		   Return the status of OW pin.	
 * Overview:		   Configure as Input pin and Read the status of OW_PIN 	
 ***********************************************************************/
-SetState read_OW (void){
-
-	OW_PIN_DIRECTION(INPUT);
+static SetState read_OW (void){
+	OW_PIN_DIRECTION(OW_INPUT);
 	 if (OW_READ_PIN())
-	 	return SET;
+	 	return OW_HIGH;
 	 else 	
-		return RESET;
+		return OW_LOW;
 }
 
 /**********************************************************************
@@ -166,12 +151,13 @@ PRESENCE_t OW_reset_pulse(void)
 
 	PRESENCE_t presence;
   	drive_OW_low(); 				// Drive the bus low
-  	delay32us(TIMER0 , 480);	  	// delay 480 microsecond (us)
-  	drive_OW_high();				// Release the bus to high
-	delay32us(TIMER0 ,70);		// delay 70 microsecond (us)
+  	delay32us(0, DELAY_480Us);	  		// delay 480 microsecond (us)
+	//drive_OW_high ();				// Release the bus
+  	OW_PIN_DIRECTION(OW_INPUT);
+  	delay32us(0, DELAY_70Us);			// delay 70 microsecond (us)
 	presence = read_OW();			//Sample for presence pulse from slave
-	delay32us(TIMER0 ,410);	  			// delay 410 microsecond (us)
-	drive_OW_high();		    	// Release the bus
+	delay32us(0, DELAY_410Us);	  			// delay 200 microsecond (us)
+	drive_OW_high ();		    	// Release the bus
 	if (presence) return (OW_DEV_NOT_PRESENT);
 		else return (OW_DEV_PRESENT);
 }	
@@ -190,16 +176,16 @@ void OW_write_bit (uint8_t write_bit){
 	{
 		//writing a bit '1'
 		drive_OW_low(); 				// Drive the bus low
-		delay32us(TIMER0 ,10);		// delay 15 microsecond (us)
-		drive_OW_high();  				// Release the bus
-		delay32us(TIMER0 ,20);		// delay 45 microsecond (us)
+		delay32us(0, DELAY_6Us);		// delay 6 microsecond (us)
+		drive_OW_high ();  				// Release the bus
+		delay32us(0, DELAY_64Us);		// delay 64 microsecond (us)
 	}
 	else{
 		//writing a bit '0'
 		drive_OW_low(); 				// Drive the bus low
-		delay32us(TIMER0 ,40);		// delay 60 microsecond (us)
-		drive_OW_high();  				// Release the bus
-		delay32us(TIMER0 ,10);		// delay 10 microsecond (us)
+		delay32us(0, DELAY_60Us);		// delay 60 microsecond (us)
+		drive_OW_high ();  				// Release the bus
+		delay32us(0, DELAY_10Us);		// delay 10 microsecond for recovery (us)
 	}
 }	
 
@@ -218,9 +204,11 @@ uint8_t OW_read_bit (void)
 	uint8_t read_data;
 	//reading a bit 
 	drive_OW_low(); 						// Drive the bus low
-	delay32us(TIMER0 ,15);				// delay 6 microsecond (us)
+	delay32us(0, DELAY_6Us);				// delay 6 microsecond (us)
+	drive_OW_high ();  						// Release the bus
+	delay32us(0, DELAY_9Us);				// delay 9 microsecond (us)
 	read_data = read_OW();					// Read the status of OW_PIN
-	delay32us(TIMER0 ,55);				// delay 55 microsecond (us)
+	delay32us(0, DELAY_55Us);				// delay 55 microsecond (us)
 	return read_data;
 }
 

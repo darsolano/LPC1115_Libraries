@@ -41,10 +41,16 @@ inline static void name##_OFF() { \
 inline static void name##_LOW() { \
 	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (0<<pin);\
 } \
+inline static void name##_SELECTED() { \
+	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (0<<pin);\
+} \
 inline static void name##_ASSERT() { \
 	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
 } \
 inline static void name##_ON() { \
+	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
+} \
+inline static void name##_DESELECTED() { \
 	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
 } \
 inline static void name##_HIGH() { \
