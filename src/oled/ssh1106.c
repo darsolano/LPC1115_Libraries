@@ -82,26 +82,12 @@ static void ssh1106_reset(void){
  Set appropriate pins as outputs
  */
 static void ssh1106_InitPins(void) {
-	/* Set up clock and muxing for SSP0 interface */
-	/*
-	 * Initialize SSP0 pins connect
-	 * P1.20: SCK
-	 * P1.21: SSEL
-	 * P1.23: MISO
-	 * P1.24: MOSI
-	 */
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 20, (IOCON_FUNC5 | IOCON_MODE_INACT));
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 21, (IOCON_FUNC0 | IOCON_MODE_INACT));
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 23, (IOCON_FUNC5 | IOCON_MODE_INACT));
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 24, (IOCON_FUNC5 | IOCON_MODE_INACT));
+	/* Set up clock and muxing for SSP1 interface */
 
+	spiinit(SSP1, 5000000);
 	SSH1106_CS_OUTPUT();
 	SSH1106_D_C_OUTPUT();
 	SSH1106_RST_OUTPUT();
-	Chip_SSP_Init(SSH1106SSPx);
-	Chip_SSP_SetMaster(SSH1106SSPx, TRUE);
-	Chip_SSP_SetBitRate(SSH1106SSPx, 1000000);
-	Chip_SSP_Enable(SSH1106SSPx);
 	SSH1106_CS_DESELECTED();
 
 }
@@ -116,7 +102,7 @@ void ssh1106_Init(void) {
 	SSH1106_CS_SELECTED();
 	ssh1106_spiIO(0xAF); // turn on LCD
 	SSH1106_CS_DESELECTED();
-	_delay_ms(100);
+	delay32Ms(0,100);
 }
 
 /*

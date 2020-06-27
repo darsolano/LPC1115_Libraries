@@ -14,8 +14,8 @@
 #include <rtc_shell.h>
 #include <ssd1306.h>
 #include <string.h>
-#include <font_OCR_Extended.h>
-#include <font_TinyFont.h>
+#include <oled/font_OCR_Extended.h>
+#include <oled/font_TinyFont.h>
 
 
 // special character on LCD defines
