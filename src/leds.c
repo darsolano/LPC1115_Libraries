@@ -28,8 +28,8 @@
 
 #include "LPC11xx.h"
 #include "leds.h"
-#include <timer32_lpc11xx.h>
 #include <lpc11xx_syscon.h>
+#include <timeout_delay.h>
 
 
 // Function to initialize GPIO to access LED2 0.7
@@ -44,18 +44,16 @@ void led2_init (void)
 }
 
 // Function to invert current state of LED2
-void led2_invert (void)
+void led2_toggle (void)
 {
-	unsigned short state = LPC_GPIO0->DATA;
-	if (state & (1<<7)) led2_OFF();
-	else led2_ON();
+	LPC_GPIO0->DATA ^= 1<<7;
 }
 
 void led2_BlinkTimes (uint8_t times)
 {
 	while (times--){
-		led2_invert();
-		delay32us(TIMER0 , dly_half_sec/2);
+		led2_toggle();
+		_delay_ms(250);
 	}
 }
 

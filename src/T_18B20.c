@@ -9,7 +9,7 @@
 
 #include <_1wire.h>
 #include <T_18B20.h>
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 
 Bool DS18B20Init(DS18b20_t* temp)
 {
@@ -45,7 +45,7 @@ Bool DS18B20ConfirmIDofDevice(DS18b20_t* temp)
 	for (i = 0; i < 8; i++)
 	{
 		OW_write_byte(temp->ROMADDR_s.ROMAddressID[i]); //send ROM code
-		delay32us(0, DELAY_10Us);
+		_delay_uS(DELAY_10Us);
 	}
 	return TRUE;
 }

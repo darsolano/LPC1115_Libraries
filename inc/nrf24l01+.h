@@ -261,7 +261,7 @@ typedef struct nrf24l01p_s
     char rx_addr_P4;			  // Last hex digit for address, first four are the same as rx_addr_P1
     char rx_addr_P5;			  // Last hex digit for address, first four are the same as rx_addr_P1
     char rx_pipe_PW[6];			  // Payload width for refer RX pipe
-   char channel;                 // channel 2.4ghz in step of 1Mhz@ 1mbps or less(125 channels) and step of 2Mhz@2mbps(62channels)
+    char channel;                 // channel 2.4ghz in step of 1Mhz@ 1mbps or less(125 channels) and step of 2Mhz@2mbps(62channels)
     char data_rate;               // data rate or speed in mbps
     char payload_size;            // Size of data buffer to be send or received
     char op_mode;                 // Operation mode as normal or pulled, Shockburst or Enhanced Shockburst

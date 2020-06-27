@@ -7,14 +7,14 @@
 
 #include <nrf24l01+.h>
 #include <debug_frmwrk.h>
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 #include <nrf24_protocol.h>
 #include <string.h>
 
 //
 // Channel info
 //
-const uint8_t _TX_PAYLOAD[16] = 		{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
+const uint8_t _TX_PAYLOAD[16] = 	{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
                                  	 0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
 
 const uint8_t _TX_ADDR[] =  {0x0e,0x0e,0x0a,0x0a,0x0b};
@@ -173,9 +173,16 @@ void nrf24_ChannelScanner(void)
 			// Select this channel
 			NRF24L01_Set_CH(i);
 
+			NRF24L01_StartListening();
+
+			_delay_uS(225);
+
 			// Did we get a carrier?
-			if ( NRF24L01_Get_CD() )
-			  ++values[i];
+			if ( NRF24L01_Get_CD() ){
+				++values[i];
+			}
+
+			NRF24L01_StopListening();
 		  }
 		}
 

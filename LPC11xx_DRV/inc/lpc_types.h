@@ -103,6 +103,10 @@ typedef int32_t (*PFI)();
 /* Set bit macro */
 #define _BIT(n) (1 << (n))
 
+#undef _BIT_CLEAR
+/* Clear bit macro */
+#define _BIT_CLEAR(n) ~(1 << (n))
+
 /* _SBF(f,v) sets the bit field starting at position "f" to value "v".
  * _SBF(f,v) is intended to be used in "OR" and "AND" expressions:
  * e.g., "((_SBF(5,7) | _SBF(12,0xF)) & 0xFFFF)"

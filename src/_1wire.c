@@ -21,7 +21,7 @@
 #include <define_pins.h>
 #include <lpc11xx_gpio.h>
 #include <lpc11xx_syscon.h>
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 
 
 /**PORT D E F I N I T I O N S ****************************************************/
@@ -151,12 +151,12 @@ PRESENCE_t OW_reset_pulse(void)
 
 	PRESENCE_t presence;
   	drive_OW_low(); 				// Drive the bus low
-  	delay32us(0, DELAY_480Us);	  		// delay 480 microsecond (us)
+  	_delay_uS(DELAY_480Us);	  		// delay 480 microsecond (us)
 	//drive_OW_high ();				// Release the bus
   	OW_PIN_DIRECTION(OW_INPUT);
-  	delay32us(0, DELAY_70Us);			// delay 70 microsecond (us)
+  	_delay_uS(DELAY_70Us);			// delay 70 microsecond (us)
 	presence = read_OW();			//Sample for presence pulse from slave
-	delay32us(0, DELAY_410Us);	  			// delay 200 microsecond (us)
+	_delay_uS(DELAY_410Us);	  			// delay 200 microsecond (us)
 	drive_OW_high ();		    	// Release the bus
 	if (presence) return (OW_DEV_NOT_PRESENT);
 		else return (OW_DEV_PRESENT);
@@ -176,16 +176,16 @@ void OW_write_bit (uint8_t write_bit){
 	{
 		//writing a bit '1'
 		drive_OW_low(); 				// Drive the bus low
-		delay32us(0, DELAY_6Us);		// delay 6 microsecond (us)
+		_delay_uS(DELAY_6Us);		// delay 6 microsecond (us)
 		drive_OW_high ();  				// Release the bus
-		delay32us(0, DELAY_64Us);		// delay 64 microsecond (us)
+		_delay_uS(DELAY_64Us);		// delay 64 microsecond (us)
 	}
 	else{
 		//writing a bit '0'
 		drive_OW_low(); 				// Drive the bus low
-		delay32us(0, DELAY_60Us);		// delay 60 microsecond (us)
+		_delay_uS(DELAY_60Us);		// delay 60 microsecond (us)
 		drive_OW_high ();  				// Release the bus
-		delay32us(0, DELAY_10Us);		// delay 10 microsecond for recovery (us)
+		_delay_uS(DELAY_10Us);		// delay 10 microsecond for recovery (us)
 	}
 }	
 
@@ -204,11 +204,11 @@ uint8_t OW_read_bit (void)
 	uint8_t read_data;
 	//reading a bit 
 	drive_OW_low(); 						// Drive the bus low
-	delay32us(0, DELAY_6Us);				// delay 6 microsecond (us)
+	_delay_uS(DELAY_6Us);				// delay 6 microsecond (us)
 	drive_OW_high ();  						// Release the bus
-	delay32us(0, DELAY_9Us);				// delay 9 microsecond (us)
+	_delay_uS(DELAY_9Us);				// delay 9 microsecond (us)
 	read_data = read_OW();					// Read the status of OW_PIN
-	delay32us(0, DELAY_55Us);				// delay 55 microsecond (us)
+	_delay_uS(DELAY_55Us);				// delay 55 microsecond (us)
 	return read_data;
 }
 

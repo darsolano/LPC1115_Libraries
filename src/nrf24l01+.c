@@ -7,7 +7,7 @@
 
 #include <lpc11xx_syscon.h>
 #include <string.h>
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 #include <define_pins.h>
 #include <nrf24l01+.h>
 #include <spi_lpc11xx.h>
@@ -133,10 +133,7 @@ DEFINE_PIN(CSN,0,2)
 */
  Bool NRF24L01_Get_CD(void) {
 
-	 NRF24L01_StartListening();
-//	 delay32us(TIMER0 ,130);	// as per manual and indications; it is embedded in previous function
-	 NRF24L01_StopListening();
-	 return (NRF24L01_ReadReg(CD));
+	 return (NRF24L01_ReadReg(CD)&1);
 }
 
 /**
@@ -266,7 +263,7 @@ DEFINE_PIN(CSN,0,2)
 void NRF24L01_TX_Reuse(void)
 {
 	RADIO_ON();
-	delay32us(TIMER0 , 10);
+	_delay_uS(10);
 	NRF24L01_WriteReg(REUSE_TX_PL,0);
 }
 
@@ -385,7 +382,7 @@ char NRF24L01_See_What_Happened(STATUS_REG_s* status_reg)
 	// Bit 1: Power Up
     // Bit 0: TX or RX mode
     NRF24L01_WriteReg(W_REGISTER | CONFIG, 0b00001010 | radio->mode);
-	delay32us(TIMER0 ,1500);
+    _delay_uS(1500);
 	RADIO_OFF();
 }
 
@@ -396,10 +393,10 @@ void NRF24L01_RF_TX(void)
 {
 	NRF24L01_Set_Power(_POWER_UP);
 	NRF24L01_Set_Device_Mode(_TX_MODE);
-	delay32us(TIMER0 ,150);
+	_delay_uS(150);
 	RADIO_OFF();
 	RADIO_ON();
-	delay32us(TIMER0 ,15);
+	_delay_uS(15);
 	RADIO_OFF();
 }
 
@@ -432,7 +429,7 @@ void NRF24L01_RF_TX(void)
      NRF24L01_Set_Power(_POWER_UP);
      NRF24L01_Set_Device_Mode(_RX_MODE);
      RADIO_ON();
-     delay32us(TIMER0 ,130);
+     _delay_uS(130);
  }
 
  void NRF24L01_StopListening(void)

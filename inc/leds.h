@@ -33,7 +33,7 @@
 #define led2_OFF()			LPC_GPIO0->DATA &= ~(1<<7)
 
 void led2_init (void);
-void led2_invert (void);
+void led2_toggle (void);
 void led2_BlinkTimes (uint8_t times);
 
 #endif /*LEDS_H_*/
