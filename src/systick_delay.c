@@ -22,7 +22,7 @@ __INLINE void systick_delay (uint32_t delayTicks) {
 //****************
 // enable systick interrupt at interval set by SYSTICKxxxx
 void systick_cfg(void){
-	if (SysTick_Config(SystemCoreClock / SYSTICKS)) {	// Configure SYS TICK for 1 micro second interrupt
+	if (SysTick_Config(SystemCoreClock / SYSTICKS)) {	// Configure SYS TICK for 1uS or 1ms interrupt
 		while (1);  // Capture error
 
 	}

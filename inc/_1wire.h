@@ -7,30 +7,28 @@
 #include <lpc_types.h>
 #include <stdint.h>
 
-
 /******* G E N E R I C   D E F I N I T I O N S ************************************************/
 
 typedef enum
 {
-	LOW = 0,
-	HIGH
+	OW_LOW = 0,
+	OW_HIGH
 }LOGIC_LEVEL_eType;
 
 typedef enum
 {
-	INPUT = 0,
-	OUTPUT = 1
+	OW_INPUT = 0,
+	OW_OUTPUT
 }DIRECTION_eType;
 
-#define Bit(n)		(1<<n)
 
 
 /******* G E N E R I C   D E F I N I T I O N S ************************************************/
 
 #define DELAY_6Us	6
-#define DELAY_8Us	8
+#define DELAY_9Us	9
 #define DELAY_10Us	10
-#define DELAY_54Us	54
+#define DELAY_55Us	55
 #define DELAY_60Us	60
 #define DELAY_64Us	64
 #define DELAY_70Us	70
@@ -42,8 +40,8 @@ typedef enum
 	OW_DEV_PRESENT
 } PRESENCE_t;
 
+
 /** P R O T O T Y P E S ******************************************************/
-uint8_t read__one_wire(void);
 void 	OW_write_bit(uint8_t write_data);
 uint8_t OW_read_bit(void);
 PRESENCE_t OW_reset_pulse(void);

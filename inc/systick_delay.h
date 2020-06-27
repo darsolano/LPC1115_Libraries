@@ -19,8 +19,8 @@ extern "C"
 
 
 
-#define  usTICKS
-//#define  msTICKS
+//#define  usTICKS
+#define  msTICKS
 
 
 #ifdef usTICKS

@@ -4,7 +4,7 @@
  * Author: dsolano
  * I2C Driven SSD1306 or SH1106 SaintSmart OLED LCD 128x64
  * Created on July 5, 2014, 1:06 AM
- * NXP LPCXpresso 1769
+ * NXP LPCXpresso 1115
  */
 #include "ssd1306.h"
 #include <string.h>
