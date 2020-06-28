@@ -45,7 +45,7 @@
 #define FIFOSIZE        8
 
 #define DELAY_COUNT     10
-#define MAX_TIMEOUT     0xFF
+//#define MAX_TIMEOUT     0xFF
 
 /* Port0.2 is the SSP select pin */
 #define SSP0_SEL        (0x1<<2)

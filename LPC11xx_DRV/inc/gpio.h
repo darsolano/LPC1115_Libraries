@@ -31,7 +31,7 @@
 #define PORT1		1
 #define PORT2		2
 #define PORT3		3
-static LPC_GPIO_TypeDef (* const LPC_GPIO[4]) = { LPC_GPIO0, LPC_GPIO1, LPC_GPIO2, LPC_GPIO3 };
+//static LPC_GPIO_TypeDef (* const LPC_GPIO[4]) = { LPC_GPIO0, LPC_GPIO1, LPC_GPIO2, LPC_GPIO3 };
 void PIOINT0_IRQHandler(void);
 void PIOINT1_IRQHandler(void);
 void PIOINT2_IRQHandler(void);

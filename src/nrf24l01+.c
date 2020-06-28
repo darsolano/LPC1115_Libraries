@@ -5,12 +5,10 @@
  *      Author: dsolano
  */
 
-#include <lpc11xx_syscon.h>
 #include <string.h>
 #include <timeout_delay.h>
 #include <define_pins.h>
 #include <nrf24l01+.h>
-#include <spi_lpc11xx.h>
 
 
 
@@ -356,7 +354,7 @@ char NRF24L01_See_What_Happened(STATUS_REG_s* status_reg)
  void NRF24L01_Init(NRF24_t *radio)
 {
 
-    spiinit(SSP0,1000000);
+    spiinit(SSP0,5000000);
     RADIO_OUTPUT();
     CSN_OUTPUT();
 

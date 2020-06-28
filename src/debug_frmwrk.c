@@ -29,9 +29,9 @@
 * this code.
 **********************************************************************/
 
+#include <chip.h>
 #include <debug_frmwrk.h>
 #include <stdarg.h>
-#include <lpc11xx_syscon.h>
 #include <stdio.h>
 
 

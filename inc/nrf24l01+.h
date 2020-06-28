@@ -8,8 +8,7 @@
 #ifndef INCLUDE_WIRELESS_H_
 #define INCLUDE_WIRELESS_H_
 
-#include <LPC11xx.h>
-#include <lpc_types.h>
+#include <chip.h>
 #include <stdint.h>
 
 #define RF24L01p	LPC_SSP0

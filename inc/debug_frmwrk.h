@@ -31,8 +31,7 @@
 #ifndef DEBUG_FRMWRK_H_
 #define DEBUG_FRMWRK_H_
 
-#include <LPC11xx.h>
-#include <lpc_types.h>
+#include <chip.h>
 #include <xprintf.h>
 
 

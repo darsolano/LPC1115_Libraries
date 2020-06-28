@@ -6,7 +6,6 @@
  */
 
 #include <spi_lpc11xx.h>
-#include <lpc11xx_syscon.h>
 
 Status spiinit(uint8_t module, uint32_t rate)
 {
@@ -56,26 +55,23 @@ Status spiinit(uint8_t module, uint32_t rate)
 
 	}
 	return SUCCESS;
-
 }
+
 
 uint8_t spirw(uint8_t module, uint8_t data)
 {
+	LPC_SSP_TypeDef* SSPx;
 	if (module)
 	{
-		while (!(LPC_SSP1->SR & SPI_STAT_TFE));
-		LPC_SSP1->DR = data;		// send a byte
-		while (!(LPC_SSP1->SR & SPI_STAT_RNE));
-		return LPC_SSP1->DR;		// Receive a byte
+		SSPx = LPC_SSP1;
+	}else{
+		SSPx = LPC_SSP0;
+	}
 
-	}
-	else
-	{
-		while (!(LPC_SSP0->SR & SPI_STAT_TFE));
-		LPC_SSP0->DR = data;		// send a byte
-		while (!(LPC_SSP0->SR & SPI_STAT_RNE));
-		return LPC_SSP0->DR;		// Receive a byte
-	}
+	while (!(SSPx->SR & SPI_STAT_TFE));
+	SSPx->DR = data;		// send a byte
+	while (!(SSPx->SR & SPI_STAT_RNE));
+	return SSPx->DR;		// Receive a byte
 }
 
 /* Embed: transmit and receive len bytes
@@ -87,6 +83,7 @@ uint8_t spirw(uint8_t module, uint8_t data)
 void spi_txrx(uint8_t* tx, uint8_t* rx, uint16_t len)
 {
 	uint8_t dummy;
+
 	while (len--)
 	{
 		if (tx == NULL)

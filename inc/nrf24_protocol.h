@@ -8,9 +8,8 @@
 #ifndef INC_NRF24_PROTOCOL_H_
 #define INC_NRF24_PROTOCOL_H_
 
+#include <chip.h>
 #include <stdint.h>
-#include <lpc_types.h>
-#include <LPC11xx.h>
 
 /*
  * Protocol Prototype Functions

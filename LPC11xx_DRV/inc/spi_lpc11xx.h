@@ -8,8 +8,8 @@
 #ifndef SPI_LPC11XX_H_
 #define SPI_LPC11XX_H_
 
-#include <LPC11xx.h>
-#include <lpc_types.h>
+#include <chip.h>
+#include <stdint.h>
 
 typedef enum
 {
@@ -24,7 +24,7 @@ typedef enum
 #define SPI_STAT_BSY			0x10
 
 
-Status spiinit(SSP_MODULE_e module , uint32_t rate);
+Status  spiinit(SSP_MODULE_e module , uint32_t rate);
 uint8_t spirw(SSP_MODULE_e module, uint8_t data);
 
 #endif /* SPI_LPC11XX_H_ */
