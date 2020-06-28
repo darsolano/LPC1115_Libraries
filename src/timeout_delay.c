@@ -7,7 +7,7 @@
 #include <lpc11xx_syscon.h>
 
 // ****************
-// _delay - creates a delay of the appropriate number of ticks (happens every 1 us)
+// _delay - creates a delay of the appropriate number of ticks (happens every 1us)
 void _delay_uS (uint32_t delayTicks) {
 	syscon_PeripheralClock(AHB_CT32B0, ENABLE);
 	LPC_TMR32B0->CTCR = 0x0;
@@ -18,6 +18,8 @@ void _delay_uS (uint32_t delayTicks) {
 	LPC_TMR32B0->TCR = 0;	// timer0 disable
 }
 
+// ****************
+// _delay - creates a delay of the appropriate number of ticks (happens every 1ms)
 void _delay_ms (uint32_t delayTicks) {
 	syscon_PeripheralClock(AHB_CT32B0, ENABLE);
 	LPC_TMR32B0->CTCR = 0x0;
