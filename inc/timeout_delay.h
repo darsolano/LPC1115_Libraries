@@ -8,7 +8,7 @@
 #ifndef INC_TIMEOUT_DELAY_H_
 #define INC_TIMEOUT_DELAY_H_
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 

@@ -8,7 +8,7 @@
 #ifndef INC_OLED_SSH1106_H_
 #define INC_OLED_SSH1106_H_
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 #include <stdint.h>
 

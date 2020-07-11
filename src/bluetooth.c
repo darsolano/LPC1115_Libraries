@@ -45,7 +45,7 @@ void BTHC06_IntEventHandler(void)
 		if (bt_Rx_Data == '*') Lclbtx->bt_state = BT_CONN;
 		if (bt_Rx_Data == '#') Lclbtx->bt_state = BT_AT_MODE;
 		RingBuffer_Insert(&bt_rb, (const void*) &bt_Rx_Data);
-		NVIC_ClearPendingIRQ(UART_IRQn);
+		NVIC_ClearPendingIRQ(UART0_IRQn);
 	}
 	__enable_irq();
 }
@@ -54,8 +54,8 @@ void BTHC06_IntEventHandler(void)
 static void init_uart(BT_CMD_t* bt) // UART
 {
 	debug_frmwrk_init(bt->baudrate);
-	NVIC_SetPriority(UART_IRQn , 1);
-	NVIC_EnableIRQ(UART_IRQn);
+	NVIC_SetPriority(UART0_IRQn , 1);
+	NVIC_EnableIRQ(UART0_IRQn);
 
 	// Init ring buffer
 	RingBuffer_Init( &bt_rb , bt_Buffer, sizeof(char) , BT_RINGBUFFER_SIZE );

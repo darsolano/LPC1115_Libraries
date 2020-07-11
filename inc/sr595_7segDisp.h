@@ -9,7 +9,7 @@
 #define	SR595_7SEGDISP_H
 
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 

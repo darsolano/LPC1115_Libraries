@@ -13,7 +13,7 @@ extern "C"
 #endif
 
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 

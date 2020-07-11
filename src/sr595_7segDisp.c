@@ -1,5 +1,5 @@
 #include "sr595_7segDisp.h"
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 #include <serial_3w.h>
 
 
@@ -97,7 +97,7 @@ void test_displays(void)
 	{
 		serial3wire_write_short((digit<<8)|digit);
 		digit = (1<<i);
-		delay32Ms(TIMER0,200);
+		_delay_ms(200);
 
 	}
 
@@ -105,9 +105,9 @@ void test_displays(void)
 	for (i=0;i<6;i++)
 	{
 		serial3wire_write_short(0xffff);
-		delay32Ms(TIMER0, 250);
+		_delay_ms(250);
 		serial3wire_write_short(0);
-		delay32Ms(TIMER0, 250);
+		_delay_ms(250);
 	}
 
 	// rount display from dot to a
@@ -116,7 +116,7 @@ void test_displays(void)
 	{
 		serial3wire_write_short((digit<<8)|digit);
 		digit = (1<<i);
-		delay32Ms(TIMER0,200);
+		_delay_ms(200);
 
 	}
 
@@ -188,7 +188,7 @@ void Count2Display()
 	for (i = 0; i < 0xff; i++)
 	{
 		DisplayNumber(i, Number);
-		delay32us(TIMER0,dly_100ms*2);
+		_delay_ms(200);
 	}
 }
 
@@ -203,7 +203,7 @@ void ShowLetters(void)
 	for (i = 'A'; i < '['; i++)
 	{
 		DisplayNumber(i, Letter);
-		delay32us(TIMER0,dly_100ms*2);
+		_delay_ms(200);
 	}
 
 }

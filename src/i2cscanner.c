@@ -6,14 +6,13 @@
  */
 
 #include  <i2cscanner.h>
-#include  <timer32_lpc11xx.h>
+#include  <timeout_delay.h>
 #include  <debug_frmwrk.h>
-#include  <i2c_lpc11xx.h>
 
 #define SPC					0x20
 #define ENTER				0x0d
 
-Status status;
+int status;
 uint8_t buff[3];
 
 //*********************************************************
@@ -21,17 +20,17 @@ uint8_t buff[3];
 //*********************************************************
 
 /* I2C Write Data*/
-static Status I2CWriteData(uint8_t* buffer, uint32_t len, uint32_t addr) {
+static int I2CWriteData(uint8_t* buffer, uint32_t len, uint32_t addr) {
 	/* Sets data to be send to RTC to init*/
-	I2C_MASTER_DATA_Typedef i2ctx;	//Data structure to be used to send byte thru I2C Master Data Transfer
+	I2C_XFER_T i2ctx;	//Data structure to be used to send byte thru I2C Master Data Transfer
 	// Fill Data Structure with proper data
-	i2ctx.rxbuff = 0;
-	i2ctx.rxlen = 0;
-	i2ctx.slv_addr = addr;
-	i2ctx.txbuff = buffer;
-	i2ctx.txlen = len;
+	i2ctx.rxBuff = 0;
+	i2ctx.rxSz = 0;
+	i2ctx.slaveAddr = addr;
+	i2ctx.txBuff = buffer;
+	i2ctx.txSz = len;
 	// Send data to I2C
-	status = i2cmaster_data_xfer(&i2ctx);
+	status = Chip_I2C_MasterTransfer(I2C0, &i2ctx);
 	return status;
 }
 //*********************************************************
@@ -68,7 +67,7 @@ void i2cscan(void)
 		}
 		else
 			xputs(" --");
-		delay32Ms(TIMER0 , 1);
+		_delay_ms(1);
 	}
 	xputs("\r\n");
 }

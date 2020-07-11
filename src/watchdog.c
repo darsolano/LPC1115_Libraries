@@ -26,7 +26,7 @@
 * copyright, permission, and disclaimer notice must appear in all copies of
 * this code.
 ****************************************************************************/
-#include "LPC11xx.h"			/* LPC11xx Peripheral Registers */
+#include "chip.h"			/* LPC11xx Peripheral Registers */
 #include <watchdog.h>
 #include <debug_frmwrk.h>
 #include <tinyrtc.h>
@@ -37,10 +37,10 @@ volatile uint32_t wdt_counter;
 // extracted from the assembly wrapper as input parameters
 void WatchDog_handler_c(unsigned int * hardfault_args, unsigned lr_value)
 {
-	LPC_WDT->MOD &= ~WDTOF;		/* clear the time-out flag and interrupt flag */
-	LPC_WDT->MOD &= ~WDINT;		/* clear the time-out flag and interrupt flag */
-	LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
-	LPC_WDT->FEED = 0x55;
+	LPC_WWDT->MOD &= ~WDTOF;		/* clear the time-out flag and interrupt flag */
+	LPC_WWDT->MOD &= ~WDINT;		/* clear the time-out flag and interrupt flag */
+	LPC_WWDT->FEED = 0xAA;		/* Feeding sequence */
+	LPC_WWDT->FEED = 0x55;
 
 	unsigned int stacked_r0;
 	unsigned int stacked_r1;
@@ -87,23 +87,23 @@ void WDT_IRQHandler(void)
 	// It extracts the location of stack frame and passes it to handler
 	// in C as a pointer. We also extract the LR value as second
 	// parameter.
-	//__asm__("MOVS r0, #4\n");
-	//__asm__("MOV r1, LR\n");
-	//__asm__("TST r0, r1\n");
-	//__asm__("BEQ stacking_used_MSP\n");
-	//__asm__("MRS R0, PSP\n");	//first parameter - stacking was using PSP
-	//__asm__("B get_LR_and_branch\n");
-	//__asm__("stacking_used_MSP:\n");
-	//__asm__("MRS R0, MSP\n"); //first parameter - stacking was using MSP
-	//__asm__("get_LR_and_branch:\n");
-	//__asm__("MOV R1, LR\n");	//second parameter is LR current value
-	//__asm__("LDR R2,=WatchDog_handler_c\n");
-	//__asm__("BX R2\n");
+	__asm__("MOVS r0, #4\n");
+	__asm__("MOV r1, LR\n");
+	__asm__("TST r0, r1\n");
+	__asm__("BEQ stacking_used_MSP\n");
+	__asm__("MRS R0, PSP\n");	//first parameter - stacking was using PSP
+	__asm__("B get_LR_and_branch\n");
+	__asm__("stacking_used_MSP:\n");
+	__asm__("MRS R0, MSP\n"); //first parameter - stacking was using MSP
+	__asm__("get_LR_and_branch:\n");
+	__asm__("MOV R1, LR\n");	//second parameter is LR current value
+	__asm__("LDR R2,=WatchDog_handler_c\n");
+	__asm__("BX R2\n");
 	xprintf("\nWatchdog Interrupt Warning Window Report\n");
-	LPC_WDT->MOD &= ~WDTOF;		/* clear the time-out flag and interrupt flag */
-	LPC_WDT->MOD &= ~WDINT;		/* clear the time-out flag and interrupt flag */
-	LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
-	LPC_WDT->FEED = 0x55;
+	LPC_WWDT->MOD &= ~WDTOF;		/* clear the time-out flag and interrupt flag */
+	LPC_WWDT->MOD &= ~WDINT;		/* clear the time-out flag and interrupt flag */
+	LPC_WWDT->FEED = 0xAA;		/* Feeding sequence */
+	LPC_WWDT->FEED = 0x55;
 }
 
 /*****************************************************************************
@@ -121,27 +121,27 @@ void WDTInit( uint32_t interval )
 	uint32_t wdt_clock;
 
 	/* Enable clock to WDT */
-	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<15);
-	LPC_SYSCON->PDRUNCFG &= ~(0x1<<6);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_WDT);
+	LPC_SYSCTL->PDRUNCFG &= ~(0x1<<6);
 
-	LPC_SYSCON->WDTCLKSEL = PCLK;		/* Select watchdog osc as PCLK */
-	LPC_SYSCON->WDTCLKDIV = 10;		/* Divided by 128 */
-	LPC_SYSCON->WDTCLKUEN = 0x01;		/* Update clock */
-	LPC_SYSCON->WDTCLKUEN = 0x00;		/* Toggle update register once */
-	LPC_SYSCON->WDTCLKUEN = 0x01;
-	while ( !(LPC_SYSCON->WDTCLKUEN & 0x01) );		/* Wait until updated */
+	LPC_SYSCTL->WDTCLKSEL = PCLK;		/* Select watchdog osc as PCLK */
+	LPC_SYSCTL->WDTCLKDIV = 10;			/* Divided by 128 */
+	LPC_SYSCTL->WDTCLKUEN = 0x01;		/* Update clock */
+	LPC_SYSCTL->WDTCLKUEN = 0x00;		/* Toggle update register once */
+	LPC_SYSCTL->WDTCLKUEN = 0x01;
+	while ( !(LPC_SYSCTL->WDTCLKUEN & 0x01) );		/* Wait until updated */
 
-	wdt_clock = (((SystemCoreClock / LPC_SYSCON->WDTCLKDIV) / 4) / 1000) * interval;
+	wdt_clock = (((SystemCoreClock / LPC_SYSCTL->WDTCLKDIV) / 4) / 1000) * interval;
 
-	LPC_WDT->TC = wdt_clock;	// this calc is in milliseconds
-	LPC_WDT->WARNINT = 0x3ff;
+	LPC_WWDT->TC = wdt_clock;	// this calc is in milliseconds
+	//LPC_WWDT->WARNINT = 0x3ff;
 	NVIC_EnableIRQ(WDT_IRQn);
 
 	/* For WDRESET test */
-	LPC_WDT->MOD = WDEN | WDRESET;
+	LPC_WWDT->MOD = WDEN | WDRESET;
 
-	LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
-	LPC_WDT->FEED = 0x55;
+	LPC_WWDT->FEED = 0xAA;		/* Feeding sequence */
+	LPC_WWDT->FEED = 0x55;
 
 	return;
 }
@@ -158,8 +158,8 @@ void WDTInit( uint32_t interval )
 *****************************************************************************/
 void WDTFeed( void )
 {
-  LPC_WDT->FEED = 0xAA;		/* Feeding sequence */
-  LPC_WDT->FEED = 0x55;
+  LPC_WWDT->FEED = 0xAA;		/* Feeding sequence */
+  LPC_WWDT->FEED = 0x55;
   return;
 }
 

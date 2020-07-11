@@ -12,14 +12,14 @@
 extern "C" {
 #endif
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 #include <stdint.h>
 
     //#define DBGPRINT
     // Peripheral ID for EEPROM 24C32 4KBytes from ATMEL
 #define I2C_24C32                           0x50
-#define I2C_24C32_BUS                       LPC_I2C
+#define I2C_24C32_BUS                       I2C0
 #define EE_READ                             1
 #define EE_WRITE                            0
 //Control & Commands for RTC - to be ored or andded with content to be sent

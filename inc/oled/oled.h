@@ -8,7 +8,7 @@
 #ifndef __OLED_H
 #define __OLED_H
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 

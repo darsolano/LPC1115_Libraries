@@ -8,7 +8,6 @@
  */
 #include "ssd1306.h"
 #include <string.h>
-#include <i2c_lpc11xx.h>
 
 Status status;
 PRIVATE uint8_t buff[12];
@@ -29,17 +28,17 @@ PRIVATE void GLCD_WriteDataLen(unsigned char data, unsigned int len);
 PRIVATE Status GLCDI2CWriteData(uint8_t* buffer, uint8_t len)
 {
 	/* Sets data to be send to GLCD to init*/
-	I2C_MASTER_DATA_Typedef i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
+	I2C_XFER_T i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
 
 	// Fill Data Structure with proper data
-	i2ctx.rxbuff = 0;
-	i2ctx.rxlen = 0;
-	i2ctx.slv_addr = SSD1306_I2C_ADDR;
-	i2ctx.txbuff = buffer;
-	i2ctx.txlen = len;
+	i2ctx.rxBuff = 0;
+	i2ctx.rxSz = 0;
+	i2ctx.slaveAddr = SSD1306_I2C_ADDR;
+	i2ctx.txBuff = buffer;
+	i2ctx.txSz = len;
 
 	// Send data to I2C
-	status = i2cmaster_data_xfer(&i2ctx);
+	status = Chip_I2C_MasterTransfer(SSD1306_I2C_BUS, &i2ctx);
 	return status;
 }
 
@@ -48,7 +47,11 @@ PRIVATE Status GLCDI2CWriteData(uint8_t* buffer, uint8_t len)
  * displayOn() to do that. */
 void GLCD_SSD1306Init(FunctionalState I2CINIT)
 {
-	if (I2CINIT) i2cinit(I2C_BITRATE_400KHz);
+	if (I2CINIT){
+		Chip_I2C_Init(SSD1306_I2C_BUS);
+		Chip_I2C_SetClockRate(SSD1306_I2C_BUS, SSD1306_I2C_RATE);
+		Chip_I2C_SetMasterEventHandler(SSD1306_I2C_BUS, Chip_I2C_EventHandlerPolling);
+	}
 	GLCDResetSSD1306();
 }
 

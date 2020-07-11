@@ -8,7 +8,7 @@
 #ifndef TINYRTC_H_
 #define TINYRTC_H_
 
-#include  <LPC11xx.h>
+#include  <chip.h>
 #include  <lpc_types.h>
 
 
@@ -18,7 +18,7 @@
 
 // I2C addres for DS1307
 #define DS1307_I2C_ADDR             0x68
-#define DS1307_I2C_BUS              LPC_I2C		// AS we will I2C0, we must PinMux the locations and Config Pads in the Init routine
+#define DS1307_I2C_BUS              I2C0		// AS we will I2C0, we must PinMux the locations and Config Pads in the Init routine
 
 #define RAM_START	0x08
 #define RAM_END		0x3f

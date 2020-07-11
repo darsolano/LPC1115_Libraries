@@ -6,7 +6,7 @@
  */
 #include <keypad_4x4.h>
 #include <mcp23008.h>
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 #include <ring_buffer.h>
 
 #define KP_RINGBUFFER_SIZE		12
@@ -41,13 +41,13 @@ PRIVATE uint8_t kp_KeyScan ( void )
 		Row = mcp23008_ReadINTCAP(MCP23008_KP_ADDR);	// Reads row status
 
 	kp_InvertConfig();									// Invert the flow of data
-	delay32Ms(TIMER0 ,5);
+	_delay_ms(5);
 
 	for(debounce=0;debounce<5;debounce++)				// Reads cols status
 		Col = mcp23008_ReadGPIO(MCP23008_KP_ADDR);
 
 	kp_Init();											// return to normal state
-	delay32Ms(TIMER0 ,5);
+	_delay_ms(5);
 
 	mcp23008_ReadINTCAP(MCP23008_KP_ADDR);				// to clear interrupt
 	return (Row | Col);

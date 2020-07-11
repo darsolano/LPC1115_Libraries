@@ -29,8 +29,10 @@
 #ifndef LEDS_H_
 #define LEDS_H_
 
-#define led2_ON()			LPC_GPIO0->DATA |= (1<<7)
-#define led2_OFF()			LPC_GPIO0->DATA &= ~(1<<7)
+#include <define_pins.h>
+
+DEFINE_PIN(led2,0,7)
+
 
 void led2_init (void);
 void led2_toggle (void);

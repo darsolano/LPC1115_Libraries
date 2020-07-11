@@ -8,7 +8,7 @@
 #ifndef INCLUDE_BLUETOOTH_H_
 #define INCLUDE_BLUETOOTH_H_
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 #include <stdint.h>
 

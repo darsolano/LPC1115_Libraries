@@ -57,7 +57,7 @@ K     GND               Ground for back light
  - TM GPIO
 \endverbatim
  */
-#include "LPC11xx.h"
+#include "chip.h"
 #include "defines.h"
 #include <lpc_types.h>
 #include <stdint.h>
@@ -93,7 +93,7 @@ K     GND               Ground for back light
  * @retval None
  */
 #if LCD_HD44780_I2C || LCD_HD44780_I2C_MCP23008
-void lcd_HD44780_Init(uint8_t cols, uint8_t rows, LPC_I2C_TypeDef* i2c, uint8_t i2caddr);
+void lcd_HD44780_Init(uint8_t cols, uint8_t rows, I2C_ID_T i2c, uint8_t i2caddr);
 #endif
 #if LCD_HD44780_PARALLEL
 void lcd_HD44780_Init(uint8_t cols, uint8_t rows);

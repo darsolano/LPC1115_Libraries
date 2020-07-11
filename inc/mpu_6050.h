@@ -8,8 +8,7 @@
 #ifndef INCLUDE_MPU_6050_H_
 #define INCLUDE_MPU_6050_H_
 
-#include <LPC11xx.h>
-#include <i2c_lpc11xx.h>
+#include <chip.h>
 
 // I2Cdev library collection - MPU6050 I2C device class
 // Based on InvenSense MPU-6050 register map document rev. 2.0, 5/19/2011 (RM-MPU-6000A-00)
@@ -57,7 +56,7 @@ THE SOFTWARE.
 #define MPU6050_ADDRESS_AD0_LOW     0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU6050_ADDRESS_AD0_HIGH    0x69 // address pin high (VCC)
 #define MPU6050_DEFAULT_ADDRESS     MPU6050_ADDRESS_AD0_LOW
-#define MPU6050_I2C_BUS				LPC_I2C
+#define MPU6050_I2C_BUS				I2C0
 #define MPU6050_I2C_RATE			400000
 
 #define MPU6050_RA_XG_OFFS_TC       0x00 //[7] PWR_MODE, [6:1] XG_OFFS_TC, [0] OTP_BNK_VLD

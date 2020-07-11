@@ -7,9 +7,8 @@
  */
 
 #include "Text_Lcd/lcd_hd44780.h"
-#include "systick_delay.h"
+#include "timeout_delay.h"
 #include "define_pins.h"
-#include "i2c_lpc11xx.h"
 
 /**
  * @defgroup TM_HD44780_Macros
@@ -35,7 +34,7 @@ DEFINE_PIN(LCD_D6,5,2)
 /* D7 - Data 7 pin */
 DEFINE_PIN(LCD_D7,2,14)
 
-#define HD44780_E_BLINK             LCD_E_HIGH(); _delay_ms(1); LCD_E_LOW(); _delay_ms(1)
+#define HD44780_E_BLINK             LCD_E_HIGH(); __dly(1); LCD_E_LOW(); __dly(1)
 
 #endif
 
@@ -49,7 +48,7 @@ typedef struct {
 	uint8_t currentX;
 	uint8_t currentY;
 #if LCD_HD44780_I2C || LCD_HD44780_I2C_MCP23008
-	LPC_I2C_TypeDef* I2Cx;
+	I2C_ID_T I2Cx;
 	uint8_t i2c_addr;
 #endif
 
@@ -63,7 +62,7 @@ static void lcd_HD44780_Data(uint8_t data);
 static void lcd_HD44780_CursorSet(uint8_t col, uint8_t row);
 
 #if LCD_HD44780_I2C
-static Status lcd_HD44780_i2c_WriteData(uint8_t data, uint8_t len);
+static int lcd_HD44780_i2c_WriteData(uint8_t data, uint8_t len);
 #endif
 
 #if LCD_HD44780_I2C_MCP23008
@@ -110,6 +109,8 @@ static HD44780_Options_t HD44780_Opts;
 #define HD44780_5x10DOTS            0x04
 #define HD44780_5x8DOTS             0x00
 
+void __dly(int delay);
+
 #if  LCD_HD44780_I2C_MCP23008
 /*
  * Control Bit position
@@ -147,13 +148,12 @@ static HD44780_Options_t HD44780_Opts;
 #define BL_ON_BIT		(1<<BL_BIT_POS)
 #define BL_OFF_BIT		(0<<BL_BIT_POS)
 
-void lcd_HD44780_Init(uint8_t cols, uint8_t rows, LPC_I2C_TypeDef* i2c, uint8_t i2caddr) {
+void lcd_HD44780_Init(uint8_t cols, uint8_t rows, I2C_ID_T i2c, uint8_t i2caddr) {
 
 #endif
 
 #if LCD_HD44780_PARALLEL
-void lcd_HD44780_Init(uint8_t cols, uint8_t rows) {
-
+	void lcd_HD44780_Init(uint8_t cols, uint8_t rows) {
 #endif
 
 	/* Set LCD width and height */
@@ -178,7 +178,7 @@ void lcd_HD44780_Init(uint8_t cols, uint8_t rows) {
 	lcd_HD44780_InitPins();
 
 	/* At least 40ms */
-	systick_delay(dly_5ms);
+	__dly(40);
 
 #if LCD_HD44780_I2C_MCP23008
 	lcd_HD44780_init_mcp23008();
@@ -187,31 +187,31 @@ void lcd_HD44780_Init(uint8_t cols, uint8_t rows) {
 
 	/* Try to set 4bit mode */
 	lcd_HD44780_Cmd4bit(0x30);
-	systick_delay(40);
+	__dly(40);
 	/* Second try */
 	lcd_HD44780_Cmd4bit(0x30);
-	systick_delay(40);
+	__dly(40);
 	/* Third goo! */
 	lcd_HD44780_Cmd4bit(0x30);
-	systick_delay(40);
+	__dly(40);
 	/* Set 4-bit interface */
 	lcd_HD44780_Cmd4bit(0x20);
-	systick_delay(5);
+	__dly(5);
 #endif
 
 #if LCD_HD44780_PARALLEL
 	/* Try to set 4bit mode */
 	lcd_HD44780_Cmd4bit(0x03);
-	systick_delay(40);
+	__dly(40);
 	/* Second try */
 	lcd_HD44780_Cmd4bit(0x03);
-	systick_delay(40);
+	__dly(40);
 	/* Third goo! */
 	lcd_HD44780_Cmd4bit(0x03);
-	_delay_ms(40);
+	__dly(40);
 	/* Set 4-bit interface */
 	lcd_HD44780_Cmd4bit(0x02);
-	systick_delay(40);
+	__dly(40);
 #endif
 	/* Set # lines, font size, etc. */
 	lcd_HD44780_Cmd(HD44780_FUNCTIONSET | HD44780_Opts.DisplayFunction);
@@ -228,7 +228,7 @@ void lcd_HD44780_Init(uint8_t cols, uint8_t rows) {
 	lcd_HD44780_Cmd(HD44780_ENTRYMODESET | HD44780_Opts.DisplayMode);
 
 	/* Delay */
-	systick_delay(5);
+	__dly(5);
 }
 
 void __dly(int delay){
@@ -240,7 +240,7 @@ void __dly(int delay){
 
 void lcd_HD44780_Clear(void) {
 	lcd_HD44780_Cmd(HD44780_CLEARDISPLAY);
-	systick_delay(5);
+	__dly(5);
 }
 
 void lcd_HD44780_Puts(uint8_t x, uint8_t y, char* str) {
@@ -398,33 +398,33 @@ static void lcd_HD44780_Cmd4bit(uint8_t cmd) {
 #endif
 
 #if LCD_HD44780_I2C
-	systick_delay(5);
+	__dly(5);
 	cmd &= ~E_ENABLE_BIT;
 	lcd_HD44780_i2c_WriteData(cmd, 1);
-	systick_delay(5);
+	__dly(5);
 
 	cmd |= E_ENABLE_BIT;
 	lcd_HD44780_i2c_WriteData(cmd, 1);
-	systick_delay(5);
+	__dly(5);
 
 	cmd &= ~E_ENABLE_BIT;
 	lcd_HD44780_i2c_WriteData(cmd, 1);
-	systick_delay(5);
+	__dly(5);
 #endif
 
 #if LCD_HD44780_I2C_MCP23008
-	systick_delay(5);
+	__dly(5);
 	cmd &= ~E_ENABLE_BIT;
 	lcd_HD44780_i2c_WriteData(0x09, cmd, 2);	//GPIO REG
-	systick_delay(5);
+	__dly(5);
 
 	cmd |= E_ENABLE_BIT;
 	lcd_HD44780_i2c_WriteData(0X09, cmd, 2);
-	systick_delay(5);
+	__dly(5);
 
 	cmd &= ~E_ENABLE_BIT;
 	lcd_HD44780_i2c_WriteData(0X09, cmd, 2);
-	systick_delay(5);
+	__dly(5);
 #endif
 
 }
@@ -454,11 +454,15 @@ static void lcd_HD44780_CursorSet(uint8_t col, uint8_t row) {
 
 static void lcd_HD44780_InitPins(void) {
 #if LCD_HD44780_I2C
-	i2cinit(100000);
+	Chip_I2C_Init(HD44780_Opts.I2Cx);
+	Chip_I2C_SetClockRate(HD44780_Opts.I2Cx, 100000);
+	Chip_I2C_SetMasterEventHandler(HD44780_Opts.I2Cx, Chip_I2C_EventHandlerPolling);
 #endif
 
 #if LCD_HD44780_I2C_MCP23008
-	i2cinit(400000);
+	Chip_I2C_Init(HD44780_Opts.I2Cx);
+	Chip_I2C_SetClockRate(HD44780_Opts.I2Cx, 400000);
+	Chip_I2C_SetMasterEventHandler(HD44780_Opts.I2Cx, Chip_I2C_EventHandlerPolling);
 #endif
 
 #if LCD_HD44780_PARALLEL
@@ -501,12 +505,12 @@ Status status;
 static Status lcd_HD44780_i2c_WriteData(uint8_t mcpreg, uint8_t data, uint8_t len){
 #endif
 #if LCD_HD44780_I2C
-Status status;
-static Status lcd_HD44780_i2c_WriteData(uint8_t data, uint8_t len){
+int status;
+static int lcd_HD44780_i2c_WriteData(uint8_t data, uint8_t len){
 #endif
 
 	/* Sets data to be send to MCP23008 to init*/
-	I2C_MASTER_DATA_Typedef i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
+	I2C_XFER_T i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
 	// Fill Data Structure with proper data
 #if LCD_HD44780_I2C_MCP23008
 	uint8_t txbuff[4] = {0};
@@ -515,16 +519,16 @@ static Status lcd_HD44780_i2c_WriteData(uint8_t data, uint8_t len){
 	i2ctx.txBuff = txbuff;
 	i2ctx.txSz = len;
 #endif
-	i2ctx.rxbuff = 0;
-	i2ctx.rxlen = 0;
-	i2ctx.slv_addr = HD44780_Opts.i2c_addr;
+	i2ctx.rxBuff = 0;
+	i2ctx.rxSz = 0;
+	i2ctx.slaveAddr = HD44780_Opts.i2c_addr;
 #if LCD_HD44780_I2C
-	i2ctx.txbuff = &data;
-	i2ctx.txlen = len;
+	i2ctx.txBuff = &data;
+	i2ctx.txSz = len;
 #endif
 
 	// Send data to I2C
-	status = i2cmaster_data_xfer(&i2ctx);
+	status = Chip_I2C_MasterTransfer(HD44780_Opts.I2Cx, &i2ctx);
 
 	return status;
 }

@@ -8,7 +8,7 @@
 #ifndef INCLUDE_CLI_CMD_H_
 #define INCLUDE_CLI_CMD_H_
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 void cli_cmd_init(void);

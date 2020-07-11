@@ -8,7 +8,7 @@
 #ifndef INCLUDE_MAX7219_H_
 #define INCLUDE_MAX7219_H_
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 #define CMD_MASK	0x0f00

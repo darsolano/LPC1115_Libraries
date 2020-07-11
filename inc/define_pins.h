@@ -24,7 +24,7 @@
  *                  (returns a 1 or 0, typed as a uint_fast8_t)
  */
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <stdint.h>
 #include <lpc_types.h>
 
@@ -33,40 +33,40 @@
 
 #define DEFINE_PIN(name, port, pin) \
 inline static void name##_DEASSERT() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (0<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] &= ~(1 << pin);\
 } \
 inline static void name##_OFF() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (0<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = (1 << pin);\
 } \
 inline static void name##_LOW() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (0<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = (1 << pin);\
 } \
 inline static void name##_SELECTED() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (0<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = 0;\
 } \
 inline static void name##_ASSERT() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = (1 << pin);\
 } \
 inline static void name##_ON() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = (1 << pin);\
 } \
 inline static void name##_DESELECTED() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = (1 << pin);\
 } \
 inline static void name##_HIGH() { \
-	LPC_GPIO##port ->MASKED_ACCESS[1<<pin] = (1<<pin);\
+	LPC_GPIO[port].DATA[1 << pin] = (1 << pin);\
 } \
 inline static void name##_TOGGLE() { \
-	LPC_GPIO##port ->DATA ^= (1 << pin); \
+	LPC_GPIO[port].DATA[1 << pin] ^= (1 << pin);\
 } \
 inline static void name##_INPUT() { \
-	LPC_GPIO##port ->DIR &= ~(1 << pin); \
+	LPC_GPIO[port].DIR &= ~(1UL << pin); \
 } \
 inline static void name##_OUTPUT() { \
-	LPC_GPIO##port ->DIR |= (1 << pin); \
+	LPC_GPIO[port].DIR |= (1UL << pin);\
 } \
 inline static uint_fast8_t name##_READ() { \
-	return ( LPC_GPIO##port ->DATA >> pin) & 1; \
+	return ( LPC_GPIO[port].DATA[1 << pin] >> pin) & 1; \
 }
 
 #endif /* INCLUDE_DEFINE_PINS_H_ */

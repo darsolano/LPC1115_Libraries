@@ -8,7 +8,7 @@
 #ifndef I2CSCANNER_H_
 #define I2CSCANNER_H_
 
-#include  <LPC11xx.h>
+#include  <chip.h>
 #include  <lpc_types.h>
 
 

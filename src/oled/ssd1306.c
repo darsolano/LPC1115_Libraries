@@ -9,7 +9,6 @@
 #include <oled/ssd1306.h>
 #include <oled/font5x7.h>
 #include <string.h>
-#include <i2c_lpc11xx.h>
 
 #if USE_SPI
 #include <define_pins.h>

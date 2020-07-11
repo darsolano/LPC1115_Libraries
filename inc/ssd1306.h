@@ -10,14 +10,14 @@
 #ifndef SSD1306_H
 #define	SSD1306_H
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 #include <stdint.h>
 
 #define PRIVATE						static
 
 #define SSD1306_I2C_ADDR            0x3C
-#define SSD1306_I2C_BUS             LPC_I2C
+#define SSD1306_I2C_BUS             I2C0
 #define SSD1306_I2C_RATE			400000
 
 // ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@ extern "C" {
 
 //#define INT
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 
 
@@ -86,9 +86,7 @@ ACC_DATA_t acc;
 #define ADC_START_NOW			(1<<24)
 #define ADC_CR_BURST_ON			(1<<16)
 #define ADC_CR_BURST_OFF		~(1<<16)
-#define ADC_CR_CH_SEL(x)		(1<<x)
 #define ADC_DONE				(1<<31)
-#define ADC_DR_RESULT(r)		(((r&0x0000FFC0)>>6)&0x000003FF)
 
 typedef enum
 {
@@ -111,8 +109,7 @@ typedef enum
 	// ADC2 = Pins 1.1
 	// ADC3 = Pins 1.2
  */
-void 		adxl335_init(void);
-
+void adxl335_init(void);
 void adxl335_ReadAxis(void);
 
 #ifdef	__cplusplus

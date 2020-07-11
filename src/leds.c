@@ -26,9 +26,8 @@
 // TO A CURRENT END USER LICENSE AGREEMENT (COMMERCIAL OR EDUCATIONAL) WITH
 // CODE RED TECHNOLOGIES LTD. 
 
-#include "LPC11xx.h"
+#include "chip.h"
 #include "leds.h"
-#include <lpc11xx_syscon.h>
 #include <timeout_delay.h>
 
 
@@ -36,17 +35,16 @@
 void led2_init (void)
 {
 	// Enable GPIO & IOCON modules clock
-	syscon_PeripheralClock(AHB_IOCON , ENABLE);
-	syscon_PeripheralClock(AHB_GPIO , ENABLE);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_GPIO);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_IOCON);
 
-	LPC_IOCON->PIO0_7 = 0x0UL;	// Pulldown resistor enabled
-	LPC_GPIO0->DIR |= (1<<7);	// As output
+	LPC_GPIO[0].DIR |= (1<<7);	// As output
 }
 
 // Function to invert current state of LED2
 void led2_toggle (void)
 {
-	LPC_GPIO0->DATA ^= 1<<7;
+	LPC_GPIO[0].DATA[1<<7] ^= 1<<7;
 }
 
 void led2_BlinkTimes (uint8_t times)

@@ -10,7 +10,7 @@
 #include <T_18B20.h>
 #include <EEP24C32.h>	// In TinyRTC board there is a EEPROM to use
 #include <debug_frmwrk.h>
-#include <timer32_lpc11xx.h>
+#include <timeout_delay.h>
 #include <rtc_shell.h>
 #include <ssd1306.h>
 #include <string.h>

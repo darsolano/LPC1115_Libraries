@@ -9,7 +9,7 @@
 #define INC_ESP8266_H_
 
 #include <lpc_types.h>
-#include <LPC11xx.h>
+#include <chip.h>
 
 
 #endif /* INC_ESP8266_H_ */

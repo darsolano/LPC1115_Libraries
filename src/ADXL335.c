@@ -6,11 +6,11 @@
 */
 
 #include <ADXL335.h>
-#include <timer32_lpc11xx.h>
-#include <lpc11xx_syscon.h>
+#include <timeout_delay.h>
 #include <float.h>
 #include <math.h>
 
+ADC_CLOCK_SETUP_T clk;
 
 uint32_t* ptr_ADDRx = (uint32_t*)((&ADXL335->DR[0])); // pointer to ADDR0 register in ADC + the channel to be checked
 uint32_t x_axis = 0;	//value of axis after read from adc.
@@ -34,25 +34,20 @@ void adxl335_init(void)
 		// ADC3 = Pins 1.2
 	 */
 	// ADC1 = Pins 1.0
-	LPC_IOCON->R_PIO1_0 = 0ul; //Clean register
-	LPC_IOCON->R_PIO1_0 |= (2<<0) ;	// as AD pin function
-	LPC_IOCON->R_PIO1_0 &= ~(1<<7);	// as AD input mode
-	// ADC2 = Pins 1.1
-	LPC_IOCON->R_PIO1_1 = 0ul; //Clean register
-	LPC_IOCON->R_PIO1_1 |= (2<<0) ;	// as AD pin function
-	LPC_IOCON->R_PIO1_1 &= ~(1<<7);	// as AD input mode
-	// ADC3 = Pins 1.2
-	LPC_IOCON->R_PIO1_2 = 0ul; //Clean register
-	LPC_IOCON->R_PIO1_2 |= (2<<0) ;	// as AD pin function
-	LPC_IOCON->R_PIO1_2 &= ~(1<<7);	// as AD input mode
+	Chip_IOCON_PinMux(LPC_IOCON, IOCON_PIO1_0, IOCON_MODE_INACT|IOCON_ADMODE_EN, FUNC2);
+	Chip_IOCON_PinMux(LPC_IOCON, IOCON_PIO1_1, IOCON_MODE_INACT|IOCON_ADMODE_EN, FUNC2);
+	Chip_IOCON_PinMux(LPC_IOCON, IOCON_PIO1_2, IOCON_MODE_INACT|IOCON_ADMODE_EN, FUNC2);
 
-	ADXL335->CR |= CLOCKS_CONV_BITS(ADC_CLK_10Bits);	// clocks for 10 bit conversion
-	ADXL335->INTEN |= 0ul;	// Disable all interrupts for ADC
+	Chip_ADC_Init(ADXL335, &clk);
+	Chip_ADC_SetSampleRate(ADXL335, &clk, ADC_RATE);
+	Chip_ADC_SetResolution(ADXL335, &clk, ADC_10BITS);	// clocks for 10 bit conversion
+	Chip_ADC_Int_SetGlobalCmd(ADXL335, DISABLE);
+
 	/* Disable Power down bit to the ADC block. */
-	LPC_SYSCON->PDRUNCFG &= ~(0x1<<4);
+	Chip_SYSCTL_PowerDown(SYSCTL_POWERDOWN_ADC_PD);
 
 	/* Enable AHB clock to the ADC. */
-	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<AHB_ADC);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_ADC);
 	ADXL335->CR &= ADC_STOP;	// No conversion at this time for Burst mode
 }
 
@@ -75,7 +70,7 @@ void adxl335_ReadAxis(void)
 		ADXL335->CR |= ADC_CR_CH_SEL(i);// Enable the channel for conversion
 		while (count--) // read 16 time for accuracy
 		{
-			delay32us(TIMER0 , 70);
+			_delay_uS(70);
 			result += ADC_DR_RESULT(*(ptr_ADDRx+i));	// read and add 16 times the result to get the media
 		}
 		// get the axis reading from ADC 0 thru 2

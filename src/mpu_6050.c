@@ -69,7 +69,9 @@ void MPU6050(uint8_t address) {
 void MPU6050_initialize() {
 
 	/* Init I2C */
-	i2cinit(I2C_BITRATE_400KHz);
+	Chip_I2C_Init(MPU6050_I2C_BUS);
+	Chip_I2C_SetClockRate(MPU6050_I2C_BUS, MPU6050_I2C_RATE);
+	Chip_I2C_SetMasterEventHandler(MPU6050_I2C_BUS, Chip_I2C_EventHandlerPolling);
 
     MPU6050_setClockSource(MPU6050_CLOCK_PLL_XGYRO);
     MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_250);
@@ -3156,7 +3158,7 @@ void MPU6050_setDMPConfig2(uint8_t config) {
  */
 int8_t I2Cdev_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data) {
     int8_t count = 0;
-    count = i2c_master_cmd_read(MPU6050_ADDRESS_AD0_LOW,regAddr,data,length);
+    Chip_I2C_MasterCmdRead(MPU6050_I2C_BUS, MPU6050_ADDRESS_AD0_LOW, regAddr, data, length);
     return count;
 }
 
@@ -3182,7 +3184,7 @@ int8_t I2Cdev_readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16
     uint8_t buf[16] = {0};
     uint8_t *ptr = &buf[0];
 
-    i2c_master_cmd_read( MPU6050_ADDRESS_AD0_LOW , regAddr , buf , length);
+    Chip_I2C_MasterCmdRead(MPU6050_I2C_BUS, MPU6050_ADDRESS_AD0_LOW, regAddr, buf, length);
 
     for (count=0;count<length;count++)
     {
@@ -3288,7 +3290,7 @@ int8_t I2Cdev_readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint
  * @return Status of operation (true = success)
  */
 Bool I2Cdev_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data) {
-    i2c_master_send( MPU6050_ADDRESS_AD0_LOW , data , length);
+	Chip_I2C_MasterSend(MPU6050_I2C_BUS, devAddr, data, length);
     return true;
 }
 
@@ -3311,7 +3313,7 @@ Bool I2Cdev_writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data) {
  */
 Bool I2Cdev_writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data) {
 
-	I2C_MASTER_DATA_Typedef i2c;
+	I2C_XFER_T i2c;
     uint8_t buf[16] = {0};
 	int count = 0;
 	uint8_t *ptr = &buf[1];
@@ -3324,10 +3326,10 @@ Bool I2Cdev_writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_
 		ptr += 2;
     }
 
-    i2c.slv_addr = devAddr;
-    i2c.txbuff = buf;
-    i2c.txlen = length;
-    i2cmaster_data_xfer( &i2c);
+    i2c.slaveAddr = devAddr;
+    i2c.txBuff = buf;
+    i2c.txSz = length;
+    Chip_I2C_MasterTransfer(MPU6050_I2C_BUS, &i2c);
     return true;
 }
 

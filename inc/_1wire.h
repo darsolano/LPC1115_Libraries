@@ -3,7 +3,7 @@
 
 
 /** I N C L U D E S **********************************************************/
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 #include <stdint.h>
 
@@ -42,12 +42,12 @@ typedef enum
 
 
 /** P R O T O T Y P E S ******************************************************/
-void 	OW_write_bit(uint8_t write_data);
-uint8_t OW_read_bit(void);
-PRESENCE_t OW_reset_pulse(void);
-void 	OW_write_byte(uint8_t write_data);
-SetState OW_read_byte(void);
-void 	OW_PinInit(uint8_t port, uint8_t pin);
+void 		OW_write_bit(uint8_t write_data);
+uint8_t 	OW_read_bit(void);
+PRESENCE_t 	OW_reset_pulse(void);
+void 		OW_write_byte(uint8_t write_data);
+SetState 	OW_read_byte(void);
+void 		OW_PinInit(uint8_t port, uint8_t pin);
 
 /*****************************************************************************
  V A R I A B L E S

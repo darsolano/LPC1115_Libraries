@@ -7,7 +7,6 @@
 
 
 #include <max7219.h>
-#include <lpc11xx_syscon.h>
 #include <systick_delay.h>
 #include <define_pins.h>
 #include <string.h>
@@ -185,8 +184,8 @@ static void max7219_Send_Data(uint8_t reg, uint8_t data, uint8_t device){
 
 void max7219_init(SCAN_LIMIT_e digits , INTENSISTY_e intensity , DECODE_e decode, uint8_t max_dev)
 {
-	syscon_PeripheralClock(AHB_IOCON,ENABLE);
-	syscon_PeripheralClock(AHB_GPIO,ENABLE);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_IOCON);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_GPIO);
 	// Set DIRECTION for Pins
 	shift_CS_OUTPUT();
 	shift_CLK_OUTPUT();

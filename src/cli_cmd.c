@@ -34,9 +34,9 @@ CLI_CMD_LIST_END()
 
 void cli_cmd_init(void)
 {
-	LPC_UART->IER = IER_RBR;	//Enable UART Module interrupt when Rx register gets data
-	NVIC_SetPriority(UART_IRQn, 1);
-	NVIC_EnableIRQ(UART_IRQn);	/* Enable System Interrupt for UART channel */
+	LPC_USART->IER = IER_RBR;	//Enable UART Module interrupt when Rx register gets data
+	NVIC_SetPriority(UART0_IRQn, 1);
+	NVIC_EnableIRQ(UART0_IRQn);	/* Enable System Interrupt for UART channel */
 	xdev_in(UARTGetChar);
 	xdev_out(UARTPutChar);
 	cli_init((const char*)"LPCXpresso Client DEMO - LPC1115\n\r");

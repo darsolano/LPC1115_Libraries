@@ -23,7 +23,12 @@ DEFINE_PIN(CSN,0,2)
 /****************************************************************
  * RADIO BASIC LOW LEVEL FUNCTIONS - ALL PRIVATE
  ****************************************************************/
-
+uint8_t spi_read_write(uint8_t data){
+	while (!(RF24L01p->SR && SSP_STAT_TFE));
+	RF24L01p->DR = data;	// sen byte to serial interface
+	while (!(RF24L01p->SR && SSP_STAT_RNE));
+	return (uint8_t) RF24L01p->DR;	// receive byte from serial interface
+}
 /**
  Read a register
 
@@ -35,8 +40,8 @@ DEFINE_PIN(CSN,0,2)
 	char Result;
 
 	CSN_LOW();
-	spirw(SSP0, Reg);
-	Result = spirw(SSP0, 0);
+	spi_read_write(Reg);
+	Result = spi_read_write(0);
 	CSN_HIGH();
 	return Result;
 }
@@ -53,8 +58,8 @@ DEFINE_PIN(CSN,0,2)
 	char Result;
 
 	CSN_LOW();
-	Result = spirw(SSP0, Reg);
-	spirw(SSP0, Value);
+	Result = spi_read_write(Reg);
+	spi_read_write(Value);
 	CSN_HIGH();
 
 	return Result;
@@ -74,10 +79,10 @@ DEFINE_PIN(CSN,0,2)
 	char Result;
 
 	CSN_LOW();
-	Result = spirw(SSP0, Reg);
+	Result = spi_read_write(Reg);
 
 	for (i = 0; i < Size; i++) {
-		Buf[i] = spirw(SSP0, 0);
+		Buf[i] = spi_read_write(0);
 	}
 
 	CSN_HIGH();
@@ -99,10 +104,10 @@ DEFINE_PIN(CSN,0,2)
 	char Result;
 
 	CSN_LOW();
-	Result = spirw(SSP0, Reg);
+	Result = spi_read_write(Reg);
 
 	for (i = 0; i < Size; i++) {
-		spirw(SSP0, Buf[i]);
+		spi_read_write(Buf[i]);
 	}
 	CSN_HIGH();
 
@@ -118,7 +123,7 @@ DEFINE_PIN(CSN,0,2)
 	char Result;
 
 	CSN_LOW();
-	Result = spirw(SSP0, 0);
+	Result = spi_read_write(0);
 	CSN_HIGH();
 
 	return Result;
@@ -245,7 +250,7 @@ DEFINE_PIN(CSN,0,2)
 */
  void NRF24L01_Flush_TX(void) {
 	CSN_LOW();
-	spirw(SSP0, FLUSH_TX);
+	spi_read_write(FLUSH_TX);
 	CSN_HIGH();
 }
 
@@ -254,7 +259,7 @@ DEFINE_PIN(CSN,0,2)
 */
  void NRF24L01_Flush_RX(void) {
 	CSN_LOW();
-	spirw(SSP0, FLUSH_RX);
+	spi_read_write(FLUSH_RX);
 	CSN_HIGH();
 }
 
@@ -269,8 +274,8 @@ void NRF24L01_TX_Reuse(void)
  {
 	char status;
 	CSN_LOW();
-	status = spirw(SSP0, FIFO_STATUS);
-	*fifo_stat = spirw(SSP0, 0);
+	status = spi_read_write(FIFO_STATUS);
+	*fifo_stat = spi_read_write(0);
 	CSN_HIGH();
     return status;
  }
@@ -282,8 +287,8 @@ char NRF24L01_Get_Rx_Payload_W(char* pldw)
 {
 	char status;
 	CSN_LOW();
-	status = spirw(SSP0, R_RX_PL_WID);
-	*pldw = spirw(SSP0, 0);
+	status = spi_read_write(R_RX_PL_WID);
+	*pldw = spi_read_write(0);
 	CSN_HIGH();
 	return status;
 }
@@ -354,7 +359,10 @@ char NRF24L01_See_What_Happened(STATUS_REG_s* status_reg)
  void NRF24L01_Init(NRF24_t *radio)
 {
 
-    spiinit(SSP0,5000000);
+    Chip_SSP_Init(RF24L01p);
+    Chip_SSP_SetBitRate(RF24L01p, 5000000);
+    Chip_SSP_SetMaster(RF24L01p, ENABLE);
+    Chip_SSP_Enable(RF24L01p);
     RADIO_OUTPUT();
     CSN_OUTPUT();
 

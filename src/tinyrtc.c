@@ -6,8 +6,7 @@
  */
 
 #include <tinyrtc.h>
-#include <timer32_lpc11xx.h>
-#include  <i2c_lpc11xx.h>
+#include <timeout_delay.h>
 #include <string.h>
 
 
@@ -29,14 +28,16 @@ const char  *month_str[12] = {"ene","feb","mar","abr","may","jun","jul","ago","s
 static void DS1307InitI2C(void){
 
 	// Set the I2C initialization
-	i2cinit(I2C_BITRATE_100KHz);
+	Chip_I2C_Init(DS1307_I2C_BUS);
+	Chip_I2C_SetClockRate(DS1307_I2C_BUS, 100000);
+	Chip_I2C_SetMasterEventHandler(DS1307_I2C_BUS, Chip_I2C_EventHandlerPolling);
 }
 
 static void StartRTC(){
 	/* Sets data to be send to RTC to init*/
 	uint8_t tmp;
 	uint8_t buff[2] = {0};
-	i2c_master_cmd_read(DS1307_I2C_ADDR,Secs_Reg,buff,1);
+	Chip_I2C_MasterCmdRead(DS1307_I2C_BUS, DS1307_I2C_ADDR, Secs_Reg, buff, 1);
 	tmp = buff[0];
 	if (tmp & 0x80)
 	{
@@ -44,7 +45,7 @@ static void StartRTC(){
 		buff[0] = Secs_Reg;	// Address for minutes register
 		buff[1] &= (0x7f & tmp);
 		// Send data to I2C
-		i2c_master_send(DS1307_I2C_ADDR,buff , 2 );
+		Chip_I2C_MasterSend(DS1307_I2C_BUS, DS1307_I2C_ADDR, buff, 2);
 	}
 }
 
@@ -56,7 +57,7 @@ static void StopRTC(){
 	buff[1] |= RTC_DISABLE;
 
 	// Send data to I2C
-	i2c_master_send(DS1307_I2C_ADDR,buff , 2 );
+	Chip_I2C_MasterSend(DS1307_I2C_BUS, DS1307_I2C_ADDR, buff, 2);
 }
 //*********************************************************
 // End Local Functions
@@ -77,7 +78,7 @@ void DS1307_Init(FunctionalState I2CINIT){
 
 	buff[0] = Control_Reg;
 	buff[1] |= (CONTROL_OUT | CONTROL_SQWE) & CONTROL_RS_1Hz;
-	i2c_master_send(DS1307_I2C_ADDR,buff , 2 );
+	Chip_I2C_MasterSend(DS1307_I2C_BUS, DS1307_I2C_ADDR, buff, 2);
 
 	StartRTC();
 }
@@ -92,7 +93,7 @@ Status DS1307ChangeAMPM(uint8_t ampm)
 {
 	uint8_t hour[2] = {0};
 	uint8_t hour_tmp;
-	i2c_master_cmd_read(DS1307_I2C_ADDR , Hour_Reg , hour ,1);	// Get hour from RTC
+	Chip_I2C_MasterCmdRead(DS1307_I2C_BUS, DS1307_I2C_ADDR, Hour_Reg, hour, 1);
 	if (!(hour[0] & MODE_12H)) return ERROR;
 	hour_tmp = hour[0] & HOUR_12_MASK;
 	switch (ampm)
@@ -110,7 +111,7 @@ Status DS1307ChangeAMPM(uint8_t ampm)
 			break;
 	}
 	hour[0] = Hour_Reg;
-	i2c_master_send(DS1307_I2C_ADDR , hour , 2);
+	Chip_I2C_MasterSend(DS1307_I2C_BUS, DS1307_I2C_ADDR, hour, 2);
 	return SUCCESS;
 error:
 	return ERROR;
@@ -121,7 +122,7 @@ Status  DS1307GetDateTime(RTC_s* rtc)
 	uint8_t buff[7] = {0};
 	if (rtc == 0) return ERROR;
 	//Set sequence to get time data
-	if (i2c_master_cmd_read(DS1307_I2C_ADDR,Secs_Reg,buff,7)) return ERROR;
+	if (Chip_I2C_MasterCmdRead(DS1307_I2C_BUS, DS1307_I2C_ADDR, Secs_Reg, buff, 7)) return ERROR;
 
 	rtc->sec  = bcd2bin(buff[0]);
 	rtc->min  = bcd2bin(buff[1]);
@@ -178,7 +179,7 @@ Status DS1307SetDate(RTC_s *date)
 	buff[3] = bin2bcd(date->month);
 	buff[4] = bin2bcd(date->year);
 
-	if (i2c_master_send(DS1307_I2C_ADDR , buff , 5)) return ERROR;
+	if (Chip_I2C_MasterSend(DS1307_I2C_BUS, DS1307_I2C_ADDR, buff, 5)) return ERROR;
 	else return SUCCESS;
 }
 
@@ -189,7 +190,7 @@ Status DS1307SetTime(RTC_s *time)
 {
 	uint8_t buff[4] = {0};
 	if (time == 0) return ERROR;
-	if (i2c_master_cmd_read(DS1307_I2C_ADDR , Secs_Reg , buff , 3)) return ERROR;
+	if (Chip_I2C_MasterCmdRead(DS1307_I2C_BUS, DS1307_I2C_ADDR, Secs_Reg, buff, 3)) return ERROR;
 
 	buff[0] = Secs_Reg;
 	buff[1] = bin2bcd(time->sec) & 0x7f;
@@ -206,7 +207,7 @@ Status DS1307SetTime(RTC_s *time)
 		buff[3] = bin2bcd(time->hour & HOUR_24_MASK);
 		buff[3] &=  MODE_24h;
 	}
-	i2c_master_send(DS1307_I2C_ADDR , buff , 4);
+	Chip_I2C_MasterSend(DS1307_I2C_BUS, DS1307_I2C_ADDR, buff, 4);
 	return SUCCESS;
 }
 
@@ -215,7 +216,7 @@ Status  DS1307SwitchHourMode(uint8_t hour_mode)
 	uint8_t buff[2] = {0};
 	uint8_t hour_tmp;
 
-	if (i2c_master_cmd_read(DS1307_I2C_ADDR,Hour_Reg,buff,1)) return ERROR; // get register from rtc
+	if (!Chip_I2C_MasterCmdRead(DS1307_I2C_BUS, DS1307_I2C_ADDR, Hour_Reg, buff, 1)) return ERROR; // get register from rtc
 
 	if (hour_mode && (buff[0] & MODE_12H))	// If hour mode is  12hour and is already 12h do nothing and return
 		return ERROR;

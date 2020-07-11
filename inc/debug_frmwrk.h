@@ -45,7 +45,7 @@
 #define true !false
 #endif
 
-#define DEBUG_UART_PORT	LPC_UART
+#define DEBUG_UART_PORT	LPC_USART
 
 #define IER_RBR         (0x01<<0)
 #define IER_THRE        (0x01<<1)

@@ -10,7 +10,7 @@
 #ifndef SSD1306_H
 #define	SSD1306_H
 
-#include <LPC11xx.h>
+#include <chip.h>
 #include <lpc_types.h>
 #include <stdint.h>
 

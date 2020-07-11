@@ -6,10 +6,9 @@
  */
 
 #include <oled/ssh1106.h>
-#include <timer32_lpc11xx.h>
 #include <define_pins.h>
 #include <oled/defaultfont.h>
-#include <spi_lpc11xx.h>
+#include <timeout_delay.h>
 
 #define SSH1106SSPx					LPC_SSP1
 
@@ -22,10 +21,10 @@ static void ssh1106_write_pixel(int x, int y, ssh1106_color_t color);
 static void ssh1106_reset(void);
 
 uint8_t ssh1106_spiIO(uint8_t data) {
-	while (!(SSH1106SSPx->SR & SPI_STAT_TFE))
+	while (!(SSH1106SSPx->SR & SSP_STAT_TFE))
 		;
 	SSH1106SSPx->DR = data;		// send a byte
-	while (!(SSH1106SSPx->SR & SPI_STAT_RNE))
+	while (!(SSH1106SSPx->SR & SSP_STAT_RNE))
 		;
 	return SSH1106SSPx->DR;		// Receive a byte
 }
@@ -72,11 +71,11 @@ void ssh1106_SetPageStart(int x) {
 
 static void ssh1106_reset(void){
 	SSH1106_RST_HIGH(); // power cycle LCD
-	delay32us(0, 5);
+	_delay_ms(5);
 	SSH1106_RST_LOW();
-	delay32us(0, 5);
+	_delay_ms(5);
 	SSH1106_RST_HIGH(); // power cycle LCD
-	delay32us(0, 5);
+	_delay_ms(5);
 }
 /*
  Set appropriate pins as outputs
@@ -84,7 +83,10 @@ static void ssh1106_reset(void){
 static void ssh1106_InitPins(void) {
 	/* Set up clock and muxing for SSP1 interface */
 
-	spiinit(SSP1, 5000000);
+	Chip_SSP_Init(SSH1106SSPx);
+	Chip_SSP_SetBitRate(SSH1106SSPx, 5000000);
+	Chip_SSP_SetMaster(SSH1106SSPx, true);
+
 	SSH1106_CS_OUTPUT();
 	SSH1106_D_C_OUTPUT();
 	SSH1106_RST_OUTPUT();
@@ -102,7 +104,7 @@ void ssh1106_Init(void) {
 	SSH1106_CS_SELECTED();
 	ssh1106_spiIO(0xAF); // turn on LCD
 	SSH1106_CS_DESELECTED();
-	delay32Ms(0,100);
+	_delay_ms(100);
 }
 
 /*

@@ -59,7 +59,7 @@ void UARTPutChar (uint8_t ch)
 uint8_t UARTGetChar (void)
 {
 	while (!(DEBUG_UART_PORT->LSR & STAT_RBDR));
-	return DEBUG_UART_PORT->RBR;
+	return (uint8_t)DEBUG_UART_PORT->RBR;
 }
 
 
@@ -330,23 +330,22 @@ int UARTprintf(const char *format, ...)
 void debug_frmwrk_init(uint32_t baudrate)
 {
 	uint32_t Fdiv;
-	LPC_SYSCON->SYSAHBCLKCTRL |= (1<<AHB_UART);	// enable device on chip UART
-	LPC_SYSCON->UARTCLKDIV = 1ul;	//Enable input clock divider
-	LPC_IOCON->PIO1_6 &= ~0x07;    /*  UART I/O config */
-	LPC_IOCON->PIO1_6 |= 0x01;     /* UART RXD */
-	LPC_IOCON->PIO1_7 &= ~0x07;
-	LPC_IOCON->PIO1_7 |= 0x01;     /* UART TXD */
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_UART0);	// enable device on chip UART
+	Chip_Clock_SetUARTClockDiv(1);						//Enable input clock divider
+
+	Chip_IOCON_PinMux(LPC_IOCON, IOCON_PIO1_6, IOCON_MODE_INACT, FUNC1);//Rx
+	Chip_IOCON_PinMux(LPC_IOCON, IOCON_PIO1_7, IOCON_MODE_INACT, FUNC1);//Tx
 
 	DEBUG_UART_PORT->LCR = 0x83;             /* 8 bits, no Parity, 1 Stop bit */
 
-    Fdiv = (((SystemCoreClock/LPC_SYSCON->SYSAHBCLKDIV)/ LPC_SYSCON->UARTCLKDIV)/16)/baudrate ;	/*baud rate */
+    Fdiv = (((SystemCoreClock/LPC_SYSCTL->SYSAHBCLKDIV)/ LPC_SYSCTL->USARTCLKDIV)/16)/baudrate ;	/*baud rate */
     DEBUG_UART_PORT->DLM = Fdiv / 256;
     DEBUG_UART_PORT->DLL = Fdiv % 256;
-    LPC_UART->LCR = 0x03;		/* DLAB = 0 */
-    LPC_UART->FCR = 0x07;		/* Enable and reset TX and RX FIFO. */
+    LPC_USART->LCR = 0x03;		/* DLAB = 0 */
+    LPC_USART->FCR = 0x07;		/* Enable and reset TX and RX FIFO. */
 
 
-    DEBUG_UART_PORT->TER = TXEN;
+    DEBUG_UART_PORT->TER1 = TXEN;
 	xdev_in(UARTGetChar);
 	xdev_out(UARTPutChar);
 

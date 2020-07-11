@@ -19,8 +19,6 @@
  /****** I N C L U D E S **********************************************************/
 #include <_1wire.h>
 #include <define_pins.h>
-#include <lpc11xx_gpio.h>
-#include <lpc11xx_syscon.h>
 #include <timeout_delay.h>
 
 
@@ -49,7 +47,8 @@ OW_t ow;
 ***********************************************************************/
 static void OW_PIN_DIRECTION (DIRECTION_eType direction)
 {
-	GPIOSetDir(ow.port, ow.pin, direction);
+	if (direction == OW_OUTPUT) LPC_GPIO[ow.port].DIR = 1<< ow.pin;
+	else LPC_GPIO[ow.port].DIR = 1<< ow.pin;
 }
 
 /**********************************************************************
@@ -61,7 +60,7 @@ static void OW_PIN_DIRECTION (DIRECTION_eType direction)
 ***********************************************************************/
 static void OW_WRITE_PIN(LOGIC_LEVEL_eType bitstate)
 {
-	GPIOSetValue(ow.port, ow.pin, bitstate);
+	LPC_GPIO[ow.port].DATA[1<<ow.pin] = 1<<ow.pin;
 }
 
 /**********************************************************************
@@ -74,7 +73,7 @@ static void OW_WRITE_PIN(LOGIC_LEVEL_eType bitstate)
 ***********************************************************************/
 static uint8_t OW_READ_PIN(void)
 {
-	return  GPIOGetValue(ow.port, ow.pin);
+	return  (((LPC_GPIO[ow.port].DATA[1 << ow.pin]) >> ow.pin) & 1);
 }
 
 //****** V A R I A B L E S ********************************************************/
@@ -90,8 +89,8 @@ unsigned char macro_delay;
 void OW_PinInit(uint8_t port, uint8_t pin)
 {
 	// PORT 1 PIN 5 for 1 wire
-	syscon_PeripheralClock(AHB_IOCON,ENABLE);
-	syscon_PeripheralClock(AHB_GPIO,ENABLE);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_IOCON);
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_GPIO);
 	ow.port = port;
 	ow.pin = pin;
 }

@@ -21,7 +21,6 @@
 #include <oled/oled.h>
 #include <oled/font5x7.h>
 #include <define_pins.h>
-#include <spi_lpc11xx.h>
 
 
 /******************************************************************************
@@ -97,9 +96,9 @@ static int I2CWrite(uint8_t addr, uint8_t* buf, uint32_t len)
 #else
 uint8_t oled_spiIO(uint8_t data)
 {
-	while (!(OLEDSSPx->SR & SPI_STAT_TFE));
+	while (!(OLEDSSPx->SR & SSP_STAT_TFE));
 	OLEDSSPx->DR = data;		// send a byte
-	while (!(OLEDSSPx->SR & SPI_STAT_RNE));
+	while (!(OLEDSSPx->SR & SSP_STAT_RNE));
 	return OLEDSSPx->DR;		// Receive a byte
 }
 
@@ -330,7 +329,7 @@ void oled_init(void)
 	 * P1.24: MOSI
 	 */
 
-	spiinit(SSP1, 5000000);
+	Chip_SSP_Init(OLEDSSPx);
 
 	OLED_CS_OUTPUT();
 	OLED_D_C_OUTPUT();

@@ -15,13 +15,13 @@ extern "C"
 {
 #endif
 #include <lpc_types.h>
-#include <LPC11xx.h>
+#include <chip.h>
 
 
 #define PRIVATE						static
 #define MCP23008_LCD_ADDR           0x20    // For LCD1602
 #define MCP23008_KP_ADDR            0x21    // For Keypad 4x4
-#define MCP23008_I2C_BUS            LPC_I2C
+#define MCP23008_I2C_BUS            I2C0
 
 //Address Access to MCP23008 Internal registers
 #define IODIR                      0x00 // Used
@@ -229,7 +229,7 @@ typedef union
 MCP23008_GPINTEN_REG_sType GPINTEN_Reg_Bits;
 
 
-Status  mcp23008_WriteGPIO(uint8_t data, uint8_t addr);
+int  mcp23008_WriteGPIO(uint8_t data, uint8_t addr);
 uint8_t mcp23008_ReadGPIO(uint8_t addr);
 Status  mcp23008_SetGPIODir(MCP23008_IODIR_REG_sType *iodircfg,uint8_t addr);
 Status  mcp23008_SetGPIOPullUps(uint8_t pullup, uint8_t addr);

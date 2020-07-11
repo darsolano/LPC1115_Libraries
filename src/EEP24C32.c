@@ -6,51 +6,51 @@
  */
 
 #include <EEP24C32.h>
-#include <timer32_lpc11xx.h>
 #include <debug_frmwrk.h>
-#include <i2c_lpc11xx.h>
+#include <timeout_delay.h>
 
 #define SPC					0x20
 #define ENTER				0x0d
 
 
-Status status;
+int status;
 uint8_t txbuff[32];
 uint8_t rxbuff[32];
 
 /** I2C Write Data*/
-static Status I2CWriteData ( uint8_t* buffer, uint8_t len )
+static int I2CWriteData ( uint8_t* buffer, uint8_t len )
 {
     /* Sets data to be send to RTC to init*/
-    I2C_MASTER_DATA_Typedef i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
+    I2C_XFER_T i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
 
     // Fill Data Structure with proper data
-    i2ctx.rxbuff = 0;
-    i2ctx.rxlen = 0;
-    i2ctx.slv_addr = I2C_24C32;
-    i2ctx.txbuff = buffer;
-    i2ctx.txlen = len;
+    i2ctx.rxBuff = 0;
+    i2ctx.rxSz = 0;
+    i2ctx.slaveAddr = I2C_24C32;
+    i2ctx.txBuff = buffer;
+    i2ctx.txSz = len;
     // Send data to I2C
-    status = i2cmaster_data_xfer( &i2ctx);
+    status = Chip_I2C_MasterTransfer(I2C_24C32_BUS, &i2ctx);
     return status;
 }
 
 /****
  * Send data thru I2C module stored in buffer, with Len, at i2c Device addr
  */
-static Status I2CReadData ( uint8_t* buffer, uint8_t len )
+static int I2CReadData ( uint8_t* buffer, uint8_t len )
 {
     /* Sets data to be send to RTC to init*/
-	I2C_MASTER_DATA_Typedef i2crx; //Data structure to be used to send byte thru I2C Master Data Transfer
+    I2C_XFER_T i2crx; //Data structure to be used to send byte thru I2C Master Data Transfer
 
     // Fill Data Structure with proper data
-    i2crx.rxbuff = buffer;
-    i2crx.rxlen = len;
-    i2crx.slv_addr = I2C_24C32;
-    i2crx.txbuff = 0;
-    i2crx.txlen = 0;
+    i2crx.rxBuff = buffer;
+    i2crx.rxSz = len;
+    i2crx.slaveAddr = I2C_24C32;
+    i2crx.txBuff = 0;
+    i2crx.txSz = 0;
+
     // Send data to I2C
-    status = i2cmaster_data_xfer ( &i2crx );
+    status = Chip_I2C_MasterTransfer(I2C_24C32_BUS, &i2crx);
     return status;
 }
 
@@ -68,7 +68,7 @@ uint8_t EEPReadByte (  uint16_t address )
     txbuff[0] = addrh;
     txbuff[1] = addrl;
     status = I2CWriteData ( txbuff, 2);
-    delay32us(TIMER0,dly_10ms);
+    _delay_ms(10);
     status = I2CReadData (  rxbuff, 1 );
     return (rxbuff[0]);
 }
@@ -88,7 +88,7 @@ uint8_t EEPWriteByte (  uint16_t addr, uint8_t data )
     txbuff[1] = addrl;
     txbuff[2] = data;
     status = I2CWriteData (  txbuff, 3 );
-    delay32us(TIMER0,dly_10ms); // 1ms
+    _delay_ms(1); // 1ms
     return (data);
 }
 
@@ -148,7 +148,7 @@ void EEPReadPage (  uint16_t page)
 void EEPReadByteLen (  uint16_t address, uint16_t len )
 {
     /* Sets data to be send to RTC to init*/
-    I2C_MASTER_DATA_Typedef i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
+    I2C_XFER_T i2ctx; //Data structure to be used to send byte thru I2C Master Data Transfer
 
     uint8_t addrl;
     uint8_t addrh;
@@ -171,13 +171,15 @@ void EEPReadByteLen (  uint16_t address, uint16_t len )
     rxbuff[0] = 0;
 
     // Fill Data Structure with proper data
-    i2ctx.rxbuff = rxbuff;
-    i2ctx.rxlen = len;
-    i2ctx.slv_addr = I2C_24C32;
-    i2ctx.txbuff = txbuff;
-    i2ctx.txlen = 2;
+    i2ctx.rxBuff = rxbuff;
+    i2ctx.rxSz = len;
+    i2ctx.slaveAddr = I2C_24C32;
+    i2ctx.txBuff = txbuff;
+    i2ctx.txSz = 2;
+
     // Send data to I2C
-    status = i2cmaster_data_xfer (  &i2ctx );
+    status = Chip_I2C_MasterTransfer(I2C_24C32_BUS, &i2ctx);
+
     ptr = rxbuff;
     for (ctr = 0; ctr < len; ctr++) {
         if (!(ctr & 0x0F)){
